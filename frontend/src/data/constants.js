@@ -1,4 +1,4 @@
-export const API_BASE = "http://localhost:5000/api";
+export const API_BASE = "https://mini-project-backend-1-zk9v.onrender.com/api";
 
 export const CATEGORIES = [
   { id: "all",     label: "All",      emoji: "🍽️" },
