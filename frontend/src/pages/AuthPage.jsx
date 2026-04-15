@@ -26,6 +26,7 @@ export default function AuthPage() {
     else if (!/\S+@\S+\.\S+/.test(form.email))      e.email   = "Invalid email address";
     if (!form.password)                             e.password = "Password is required";
     else if (form.password.length < 6)              e.password = "Minimum 6 characters";
+    else if (form.password.length > 12)		    e.password = "Maximum 12 characters allowed";
     if (!isLogin && form.password !== form.confirm) e.confirm  = "Passwords do not match";
     setErrors(e);
     return Object.keys(e).length === 0;
