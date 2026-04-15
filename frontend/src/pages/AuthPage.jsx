@@ -32,6 +32,7 @@ export default function AuthPage() {
   };
 
   /* ── Submit (UPDATED FOR PERSISTENCE) ── */
+  /* ── Submit (FIXED LOGIC ORDER) ── */
   const handleSubmit = async () => {
     if (!validate()) return;
     setLoading(true);
@@ -40,23 +41,22 @@ export default function AuthPage() {
       const endpoint = isLogin ? "/auth/login" : "/auth/signup";
 
       const res = await fetch(`${API_BASE}${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "" // Manually clear any persistent header
-      },
-      body: JSON.stringify({
-        email: form.email.trim(), // Ensure no accidental spaces
-        password: form.password,
-      }),
-    });
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "" 
+        },
+        body: JSON.stringify({
+          name: form.name, // Added back for Signup!
+          email: form.email.trim(),
+          password: form.password,
+        }),
+      });
 
-      // 1. Prevent HTML-error-parsing-as-JSON crash
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const textError = await res.text();
-        console.error("Server Error:", textError);
-        setErrors({ api: "Server is currently unavailable (500). Check MongoDB Atlas access." });
+        setErrors({ api: "Server error. Check backend logs." });
         return;
       }
 
@@ -67,22 +67,31 @@ export default function AuthPage() {
         return;
       }
 
-      if (res.ok) {
+      // 1. SAVE DATA FIRST
       localStorage.setItem("token", data.token);
-      setUser(data.user); 
-      setPage("home");
-    }
+      
+      // 2. CHECK IF USER DATA EXISTS BEFORE TOASTING
+      if (!data.user || !data.user.name) {
+        console.error("User data missing from response", data);
+        setUser(data.user || { name: "User" }); // Fallback
+      } else {
+        setUser(data.user);
+      }
 
+      // 3. TOAST FIRST (While component is still mounted)
       addToast(
         isLogin
-          ? `Welcome back, ${data.user.name}! 👋`
+          ? `Welcome back, ${data.user?.name || 'User'}! 👋`
           : `Account created successfully 🎉`,
         "success"
       );
 
+      // 4. REDIRECT LAST
+      setPage("home");
+
     } catch (error) {
       console.error("Login Error:", error);
-      setErrors({ api: "Network error. Please check your internet or Vercel logs." });
+      setErrors({ api: "Network error. Please try again." });
     } finally {
       setLoading(false);
     }
