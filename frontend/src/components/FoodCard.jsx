@@ -44,7 +44,14 @@ export default function FoodCard({ item, onAdd, delay = 0 }) {
           <span className={styles.price}>₹{item.price}</span>
           <button
             className={styles.addBtn}
-            onClick={() => onAdd(item)}
+            onClick={() =>
+              onAdd({
+                _id: item._id,
+                name: item.name,
+                price: item.price,
+                image: item.image,
+              })
+            }
             aria-label={`Add ${item.name} to cart`}
           >
             +

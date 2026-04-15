@@ -53,19 +53,40 @@ export default function CheckoutPage() {
   };
 
   const handleOrder = async () => {
-    if (!validate()) return;
-    setPlacing(true);
-    try {
-      await new Promise((r) => setTimeout(r, 1800)); 
-      dispatch({ type: "CLEAR" });
-      addToast("Order placed successfully! 🎉", "success");
-      setPage("orders");
-    } catch {
-      addToast("Failed to place order. Please try again.", "error");
-    } finally {
-      setPlacing(false);
-    }
-  };
+  if (!validate()) return;
+  setPlacing(true);
+
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`${API_BASE}/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        restaurant: "Food App",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message);
+
+    // ✅ CLEAR FRONTEND CART
+    dispatch({ type: "CLEAR" });
+
+    addToast("Order placed successfully 🎉", "success");
+    setPage("orders");
+
+  } catch (err) {
+    console.log(err);
+    addToast("Order failed", "error");
+  } finally {
+    setPlacing(false);
+  }
+};
 
   if (cart.length === 0) {
     return (
@@ -128,10 +149,10 @@ export default function CheckoutPage() {
               {cart.map((item) => (
                 <div className={styles.summaryItem} key={item._id}>
                   <span className={styles.summaryLeft}>
-                    <span className={styles.summaryEmoji}>{item.emoji}</span>
-                    <span>{item.name} × {item.qty}</span>
+                    <span className={styles.summaryEmoji}>{item.emoji || "🍽️"}</span>
+                    <span>{item.name} × {item.quantity}</span>
                   </span>
-                  <span className={styles.summaryPrice}>₹{item.price * item.qty}</span>
+                  <span className={styles.summaryPrice}>₹{item.price * item.quantity}</span>
                 </div>
               ))}
             </div>

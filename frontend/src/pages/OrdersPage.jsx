@@ -1,7 +1,8 @@
 import { useApp } from "../context/AppContext";
-import { SAMPLE_ORDERS } from "../data/constants";
 import Icons from "../components/Icons";
 import styles from "./OrdersPage.module.css";
+import { useEffect, useState } from "react";
+import { API_BASE } from "../data/constants"; // ✅ ADD THIS
 
 const STATUS_STYLE = {
   Delivered:  { bg: "rgba(61,220,132,0.12)",  color: "var(--green)"  },
@@ -11,6 +12,33 @@ const STATUS_STYLE = {
 
 export default function OrdersPage() {
   const { user, setPage } = useApp();
+
+  // ✅ INSIDE component
+  const [orders, setOrders] = useState([]);
+
+  // ✅ INSIDE component
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(`${API_BASE}/orders`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setOrders(data);
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
   if (!user) {
     return (
       <div className={styles.gated}>
@@ -33,54 +61,58 @@ export default function OrdersPage() {
       </div>
 
       <div className={styles.list}>
-        {SAMPLE_ORDERS.map((order) => {
-          const s = STATUS_STYLE[order.status] || STATUS_STYLE["Preparing"];
-          return (
-            <div className={styles.card} key={order._id}>
-              <div className={styles.top}>
-                <div>
-                  <div className={styles.orderId}>{order._id}</div>
-                  <div className={styles.meta}>
-                    🏪 {order.restaurant} &nbsp;·&nbsp; {order.date}
+        {orders.length === 0 ? (
+          <p>No orders yet 😢</p>
+        ) : (
+          orders.map((order) => {
+            const s = STATUS_STYLE[order.status] || STATUS_STYLE["Preparing"];
+            return (
+              <div className={styles.card} key={order._id}>
+                <div className={styles.top}>
+                  <div>
+                    <div className={styles.orderId}>{order._id}</div>
+                    <div className={styles.meta}>
+                      🏪 {order.restaurant} · {new Date(order.date).toLocaleDateString()}
+                    </div>
                   </div>
+                  <span
+                    className={styles.pill}
+                    style={{ background: s.bg, color: s.color }}
+                  >
+                    {order.status}
+                  </span>
                 </div>
-                <span
-                  className={styles.pill}
-                  style={{ background: s.bg, color: s.color }}
-                >
-                  {order.status}
-                </span>
-              </div>
 
-            
-              <div className={styles.items}>
-                {order.items.map((emoji, i) => (
-                  <span key={i} className={styles.itemEmoji}>{emoji}</span>
-                ))}
-              </div>
+                <div className={styles.items}>
+                  {order.items.map((emoji, i) => (
+                    <span key={i} className={styles.itemEmoji}>{emoji}</span>
+                  ))}
+                </div>
 
-              
-              <div className={styles.bottom}>
-                <span className={styles.delivery}>
-                  <Icons.Truck />
-                  &nbsp;
-                  {order.status === "Delivered" ? "Delivered successfully" : "Est. 30 min"}
-                </span>
-                <span className={styles.total}>₹{order.total}</span>
-              </div>
+                <div className={styles.bottom}>
+                  <span className={styles.delivery}>
+                    <Icons.Truck />
+                    &nbsp;
+                    {order.status === "Delivered"
+                      ? "Delivered successfully"
+                      : "Est. 30 min"}
+                  </span>
+                  <span className={styles.total}>₹{order.total}</span>
+                </div>
 
-              {order.status === "Delivered" && (
-                <button
-                  className="btn btn-ghost"
-                  style={{ width: "100%", marginTop: 14, fontSize: 13 }}
-                  onClick={() => setPage("menu")}
-                >
-                  🔁 Reorder
-                </button>
-              )}
-            </div>
-          );
-        })}
+                {order.status === "Delivered" && (
+                  <button
+                    className="btn btn-ghost"
+                    style={{ width: "100%", marginTop: 14, fontSize: 13 }}
+                    onClick={() => setPage("menu")}
+                  >
+                    🔁 Reorder
+                  </button>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

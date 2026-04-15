@@ -50,7 +50,7 @@ export default function CartDrawer() {
                 <div className={styles.itemInfo}>
                   <div className={styles.itemName}>{item.name}</div>
                   <div className={styles.itemPrice}>
-                    ₹{item.price} × {item.qty} = <strong>₹{item.price * item.qty}</strong>
+                    ₹{item.price} × {item.quantity} = <strong>₹{item.price * item.quantity}</strong>
                   </div>
                 </div>
                 <div className={styles.qtyCtrl}>
@@ -61,7 +61,7 @@ export default function CartDrawer() {
                   >
                     <Icons.Minus />
                   </button>
-                  <span className={styles.qtyVal}>{item.qty}</span>
+                  <span className={styles.qtyVal}>{item.quantity}</span>
                   <button
                     className={styles.qtyBtn}
                     onClick={() => dispatch({ type: "INC", id: item._id })}

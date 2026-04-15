@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
 import { useApp } from "../context/AppContext";
-import { SAMPLE_ORDERS } from "../data/constants";
 import Icons from "../components/Icons";
 import styles from "./AccountPage.module.css";
+import { useEffect } from "react";
+import { API_BASE } from "../data/constants";
+
 const TABS = [
   { id: "profile",   label: "Profile",       icon: "👤" },
   { id: "orders",    label: "My Orders",     icon: "📦" },
@@ -24,6 +26,30 @@ function getInitials(name = "") {
 export default function AccountPage() {
   const { user, setUser, setPage, addToast } = useApp();
   const [activeTab, setActiveTab] = useState("profile");
+
+  useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API_BASE}/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setUser(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchProfile(); // ✅ ALWAYS CALL
+}, []);
 
   if (!user) {
     return (
@@ -105,6 +131,18 @@ function ProfileTab({ user, setUser, addToast }) {
     dob:     user.dob     || "",
     bio:     user.bio     || "",
   });
+  useEffect(() => {
+  if (user) {
+    setForm({
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      gender: user.gender || "",
+      dob: user.dob || "",
+      bio: user.bio || "",
+    });
+  }
+}, [user]);
   const [errors, setErrors] = useState({});
 
   const set = (k) => (e) => {
@@ -124,15 +162,33 @@ function ProfileTab({ user, setUser, addToast }) {
 
   const handleSave = async () => {
     if (!validate()) return;
-    // const token = localStorage.getItem("token");
-    // await fetch(`${API_BASE}/user/profile`, {
-    //   method: "PUT",
-    //   headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    //   body: JSON.stringify(form),
-    // });
-    setUser((u) => ({ ...u, ...form }));
-    addToast("Profile updated successfully! ✅", "success");
-    setEditing(false);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API_BASE}/user/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        addToast(data.message || "Error updating profile", "error");
+        return;
+      }
+
+      setUser(data);
+      addToast("Profile updated successfully! ✅", "success");
+      setEditing(false);
+
+    } catch (err) {
+      addToast("Network error", "error");
+    }
   };
 
   return (
@@ -226,6 +282,28 @@ function ProfileTab({ user, setUser, addToast }) {
 }
 
 function OrdersTab({ setPage }) {
+    const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(`${API_BASE}/orders`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setOrders(data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchOrders();
+  }, []);
   return (
     <div className={styles.tabContent}>
       <div className={styles.tabHeader}>
@@ -239,7 +317,7 @@ function OrdersTab({ setPage }) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {SAMPLE_ORDERS.map((order) => {
+        {orders.map((order) => {
           const s = STATUS_STYLE[order.status] || STATUS_STYLE["Preparing"];
           return (
             <div className={styles.orderCard} key={order._id}>
@@ -279,32 +357,114 @@ function OrdersTab({ setPage }) {
 }
 
 
-const SAMPLE_ADDRESSES = [
-  { id: 1, label: "🏠 Home",   line1: "Flat 12B, Sunshine Apartments", line2: "MG Road, Dehradun, 248001", default: true  },
-  { id: 2, label: "💼 Office", line1: "3rd Floor, Tech Park Building",  line2: "IT Park, Dehradun, 248002",  default: false },
-];
-
 function AddressesTab({ addToast }) {
-  const [addresses, setAddresses] = useState(SAMPLE_ADDRESSES);
+  const [addresses, setAddresses] = useState([]);
   const [showForm, setShowForm]   = useState(false);
   const [newAddr, setNewAddr]     = useState({ label: "", line1: "", line2: "", city: "", pincode: "" });
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-  const setDefault = (id) => {
-    setAddresses((a) => a.map((x) => ({ ...x, default: x.id === id })));
-    addToast("Default address updated ✅", "success");
+        const res = await fetch(`${API_BASE}/addresses`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          addToast("Failed to load addresses", "error");
+          return;
+        }
+
+        setAddresses(data);
+
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchAddresses();
+  }, []);
+
+  const setDefault = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API_BASE}/addresses/default/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const updated = await res.json();
+
+      setAddresses((a) =>
+        a.map((x) => ({
+          ...x,
+          isDefault: x._id === updated._id,
+        }))
+      );
+
+      addToast("Default address updated ✅", "success");
+
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const deleteAddress = (id) => {
-    setAddresses((a) => a.filter((x) => x.id !== id));
-    addToast("Address removed", "info");
+  const deleteAddress = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await fetch(`${API_BASE}/addresses/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setAddresses((a) => a.filter((x) => x._id !== id));
+      addToast("Address removed", "info");
+
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const addAddress = () => {
-    if (!newAddr.line1 || !newAddr.city) { addToast("Please fill address details", "error"); return; }
-    setAddresses((a) => [...a, { ...newAddr, id: Date.now(), default: false }]);
-    setNewAddr({ label: "", line1: "", line2: "", city: "", pincode: "" });
-    setShowForm(false);
-    addToast("Address added ✅", "success");
+  const addAddress = async () => {
+    if (!newAddr.line1 || !newAddr.city) {
+      addToast("Please fill address details", "error");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API_BASE}/addresses`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newAddr),
+      });
+
+      const data = await res.json();
+
+      setAddresses((a) => [...a, data]);
+      setNewAddr({ label: "", line1: "", line2: "", city: "", pincode: "" });
+      setShowForm(false);
+
+      addToast("Address added ✅", "success");
+
+    } catch (err) {
+      addToast("Error adding address", "error");
+    }
   };
 
   const set = (k) => (e) => setNewAddr((f) => ({ ...f, [k]: e.target.value }));
@@ -459,15 +619,44 @@ function SettingsTab({ user, setUser, addToast, handleLogout }) {
     addToast("Preference saved ✅", "success");
   };
 
-  const changePassword = () => {
+  const changePassword = async () => {
     const e = {};
+
     if (!pwForm.current) e.current = "Enter current password";
     if (!pwForm.newPw || pwForm.newPw.length < 6) e.newPw = "Minimum 6 characters";
     if (pwForm.newPw !== pwForm.confirm) e.confirm = "Passwords don't match";
+
     setPwErr(e);
     if (Object.keys(e).length > 0) return;
-    addToast("Password changed successfully 🔐", "success");
-    setPwForm({ current: "", newPw: "", confirm: "" });
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${API_BASE}/user/change-password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword: pwForm.current,
+          newPassword: pwForm.newPw,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        addToast(data.message || "Error updating password", "error");
+        return;
+      }
+
+      addToast("Password changed successfully 🔐", "success");
+      setPwForm({ current: "", newPw: "", confirm: "" });
+
+    } catch (err) {
+      addToast("Network error", "error");
+    }
   };
 
   return (
