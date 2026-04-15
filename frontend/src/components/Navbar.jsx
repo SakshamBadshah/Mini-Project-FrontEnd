@@ -77,7 +77,7 @@ export default function Navbar() {
                 onClick={() => setDropOpen((v) => !v)}
               >
                 <div className={styles.accountAvatar}>{getInitials(user.name)}</div>
-                <span className={styles.accountName}>{user.name.split(" ")[0]}</span>
+                <span className={styles.accountName}>{user?.name ? user.name.split(" ")[0] : "User"}</span>
                 <span className={styles.accountChevron} style={{ transform: dropOpen ? "rotate(180deg)" : "none" }}>▾</span>
               </button>
 

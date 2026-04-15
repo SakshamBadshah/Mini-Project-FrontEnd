@@ -19,10 +19,17 @@ const STATUS_STYLE = {
   "In Transit":{ bg: "rgba(100,170,255,0.12)", color: "var(--blue)"   },
 };
 
-function getInitials(name = "") {
-  return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
-}
+function getInitials(name) {
+  if (!name || typeof name !== "string") return "??";
 
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
 export default function AccountPage() {
   const { user, setUser, setPage, addToast } = useApp();
   const [activeTab, setActiveTab] = useState("profile");
@@ -41,7 +48,7 @@ export default function AccountPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setUser(data);
+        setUser(data.user || data);
       }
     } catch (err) {
       console.log(err);
