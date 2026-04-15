@@ -4,22 +4,18 @@ import Icons from "./Icons";
 import styles from "./Navbar.module.css";
 
 function getInitials(name) {
-  if (!name || typeof name !== 'string') {
-    return "??"; 
-  }
+  if (!name || typeof name !== 'string') return "??";
 
   try {
-    const parts = name.trim().split(" ");
-    const initials = parts
-      .filter(part => part.length > 0)
-      .map((w) => w[0])
+    return name
+      .trim()
+      .split(/\s+/)      
+      .map((w) => w[0]) 
       .join("")
       .toUpperCase()
       .slice(0, 2);
-    
-    return initials || "??";
   } catch (err) {
-    return "??";
+    return "??";         // Final emergency fallback
   }
 }
 
