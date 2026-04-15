@@ -32,7 +32,8 @@ function getInitials(name) {
 }
 export default function AccountPage() {
   const { user, setUser, setPage, addToast } = useApp();
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState(() => {
+  return sessionStorage.getItem("activeTab") || "profile";});
 
   useEffect(() => {
   const fetchProfile = async () => {
@@ -101,7 +102,7 @@ export default function AccountPage() {
               <button
                 key={t.id}
                 className={`${styles.navBtn} ${activeTab === t.id ? styles.navBtnActive : ""}`}
-                onClick={() => setActiveTab(t.id)}
+                onClick={() => {setActiveTab(t.id);sessionStorage.setItem("activeTab", t.id);}}
               >
                 <span className={styles.navIcon}>{t.icon}</span>
                 <span>{t.label}</span>
