@@ -26,31 +26,33 @@ function getInitials(name = "") {
 export default function AccountPage() {
   const { user, setUser, setPage, addToast } = useApp();
   const [activeTab, setActiveTab] = useState("profile");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
   const fetchProfile = async () => {
-    try {
       const token = localStorage.getItem("token");
-
-      const res = await fetch(`${API_BASE}/user/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setUser(data);
+      if (!token) {
+        setLoading(false); // No token, stop loading
+        return;
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
-  fetchProfile(); // ✅ ALWAYS CALL
-}, []);
+      try {
+        const res = await fetch(`${API_BASE}/user/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok) setUser(data);
+        else localStorage.removeItem("token"); // Token expired or invalid
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false); // 👈 End loading regardless of result
+      }
+    };
+    fetchProfile();
+  }, [setUser]);
 
+  if (loading) return <div className="loader">Verifying session...</div>;
   if (!user) {
     return (
       <div className={styles.gated}>
@@ -70,6 +72,7 @@ export default function AccountPage() {
     addToast("Logged out successfully. See you soon! 👋", "info");
     setPage("home");
   };
+  
 
   return (
     <div className="page">
