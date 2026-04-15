@@ -3,8 +3,16 @@ import { useApp } from "../context/AppContext";
 import Icons from "./Icons";
 import styles from "./Navbar.module.css";
 
-function getInitials(name = "") {
-  return name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+function getInitials(name) {
+  if (!name || typeof name !== 'string') return "??";
+
+  const parts = name.trim().split(/\s+/); 
+  
+  const initials = parts
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+  return initials.slice(0, 2);
 }
 
 export default function Navbar() {

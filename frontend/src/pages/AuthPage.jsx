@@ -67,12 +67,11 @@ export default function AuthPage() {
         return;
       }
 
-      // ✅ 1. Save token IMMEDIATELY
+      if (res.ok) {
       localStorage.setItem("token", data.token);
-
-      // ✅ 2. Use the data from BACKEND (data.user) not the FORM state
-      // This ensures you have the correct _id and profile info
-      setUser(data.user);
+      setUser(data.user); 
+      setPage("home");
+    }
 
       addToast(
         isLogin
@@ -80,9 +79,6 @@ export default function AuthPage() {
           : `Account created successfully 🎉`,
         "success"
       );
-
-      // ✅ 3. Redirect
-      setPage("home");
 
     } catch (error) {
       console.error("Login Error:", error);
