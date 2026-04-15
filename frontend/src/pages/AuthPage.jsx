@@ -23,6 +23,7 @@ export default function AuthPage() {
     const e = {};
     if (!isLogin && !form.name.trim())              e.name    = "Full name is required";
     if (!form.email.trim())                         e.email   = "Email is required";
+    else if (form.email.length > 50)		            e.email   = "Email is too long";
     else if (!/\S+@\S+\.\S+/.test(form.email))      e.email   = "Invalid email address";
     if (!form.password)                             e.password = "Password is required";
     else if (form.password.length < 6)              e.password = "Minimum 6 characters";
@@ -32,7 +33,6 @@ export default function AuthPage() {
     return Object.keys(e).length === 0;
   };
 
-  /* ── Submit (UPDATED FOR PERSISTENCE) ── */
   /* ── Submit (FIXED LOGIC ORDER) ── */
   const handleSubmit = async () => {
     if (!validate()) return;

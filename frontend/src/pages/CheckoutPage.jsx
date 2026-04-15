@@ -39,10 +39,13 @@ export default function CheckoutPage() {
   const validate = () => {
     const e = {};
     if (!form.name.trim())    e.name    = "Full name is required";
+    else if(form.name.length > 20)		            e.name   = "Name is too long";
     if (!form.phone.trim())   e.phone   = "Phone number is required";
+    else if (form.phone.length > 13)		            e.phone   = "Phone number is too long";
     if (!form.address.trim()) e.address = "Address is required";
     if (!form.city.trim())    e.city    = "City is required";
     if (!form.pincode.trim()) e.pincode = "Pincode is required";
+    else if (form.pincode.length > 6)		            e.pincode   = "Pincode is invalid";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
