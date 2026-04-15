@@ -1,0 +1,20 @@
+.header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 52px 24px 36px;
+}
+.title {
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.sub { color: var(--muted); font-size: 15px; }
+
+.grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}

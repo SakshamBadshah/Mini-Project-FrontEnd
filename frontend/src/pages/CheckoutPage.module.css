@@ -1,0 +1,111 @@
+.empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 60vh; text-align: center;
+  padding: 60px 24px; gap: 14px;
+}
+.emptyIcon { font-size: 64px; opacity: 0.45; }
+.empty h2  { font-size: 26px; font-weight: 800; }
+.empty p   { color: var(--muted); font-size: 15px; }
+
+.pageHeader {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 52px 24px 32px;
+}
+.title { font-size: clamp(28px, 4vw, 36px); font-weight: 800; }
+
+.grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* .left  {}
+.right {} */
+
+.section { padding: 28px; }
+
+.sectionTitle {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px; font-weight: 800;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+
+.payGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.payOpt {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 13px;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 500;
+}
+.payOpt:hover { border-color: rgba(255,107,43,0.35); }
+.paySelected  { border-color: var(--orange); background: var(--orange-glow); color: var(--orange); }
+.payIcon      { font-size: 20px; }
+
+
+.summaryCard {
+  padding: 28px;
+  position: sticky;
+  top: 84px;
+}
+
+.summaryItems { margin-bottom: 8px; }
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.summaryLeft  { display: flex; align-items: center; gap: 10px; }
+.summaryEmoji { font-size: 20px; }
+.summaryPrice { font-weight: 600; }
+
+.rows { margin-top: 8px; }
+.row  {
+  display: flex; justify-content: space-between;
+  padding: 5px 0; font-size: 13px; color: var(--muted);
+}
+
+.totalRow {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 14px; margin-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.totalLabel { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+.totalVal   { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--orange); }
+
+.secure {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .grid    { grid-template-columns: 1fr; }
+  .payGrid { grid-template-columns: 1fr; }
+  .summaryCard { position: static; }
+}
+@media (max-width: 480px) {
+  .section { padding: 20px; }
+}
