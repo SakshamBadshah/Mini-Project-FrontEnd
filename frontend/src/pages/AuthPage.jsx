@@ -40,16 +40,16 @@ export default function AuthPage() {
       const endpoint = isLogin ? "/auth/login" : "/auth/signup";
 
       const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-        }),
-      });
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "" // Manually clear any persistent header
+      },
+      body: JSON.stringify({
+        email: form.email.trim(), // Ensure no accidental spaces
+        password: form.password,
+      }),
+    });
 
       // 1. Prevent HTML-error-parsing-as-JSON crash
       const contentType = res.headers.get("content-type");
