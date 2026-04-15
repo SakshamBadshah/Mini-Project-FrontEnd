@@ -58,6 +58,34 @@ export function AppProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [user, setUser] = useState(null);
 
+  useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setUser(data.user || data);
+      } else {
+        localStorage.removeItem("token");
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchUser();
+}, []);
+
   // ✅ FETCH CART FROM BACKEND
   useEffect(() => {
     const fetchCart = async () => {
