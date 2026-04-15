@@ -31,7 +31,7 @@ export default function AuthPage() {
     return Object.keys(e).length === 0;
   };
 
-  /* ── Submit (CONNECTED TO BACKEND) ── */
+  /* ── Submit (UPDATED FOR PERSISTENCE) ── */
   const handleSubmit = async () => {
     if (!validate()) return;
     setLoading(true);
@@ -51,39 +51,46 @@ export default function AuthPage() {
         }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrors({ api: data.message || "Something went wrong" });
+      // 1. Prevent HTML-error-parsing-as-JSON crash
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const textError = await res.text();
+        console.error("Server Error:", textError);
+        setErrors({ api: "Server is currently unavailable (500). Check MongoDB Atlas access." });
         return;
       }
 
-      // ✅ Save token
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrors({ api: data.message || "Invalid credentials" });
+        return;
+      }
+
+      // ✅ 1. Save token IMMEDIATELY
       localStorage.setItem("token", data.token);
 
-      // ✅ Set user
-      setUser({
-        name: form.name || form.email.split("@")[0],
-        email: form.email,
-      });
+      // ✅ 2. Use the data from BACKEND (data.user) not the FORM state
+      // This ensures you have the correct _id and profile info
+      setUser(data.user);
 
       addToast(
         isLogin
-          ? `Welcome back, ${form.email}! 👋`
+          ? `Welcome back, ${data.user.name}! 👋`
           : `Account created successfully 🎉`,
         "success"
       );
 
+      // ✅ 3. Redirect
       setPage("home");
 
     } catch (error) {
-      console.log(error);
-      setErrors({ api: "Network error. Please try again." });
+      console.error("Login Error:", error);
+      setErrors({ api: "Network error. Please check your internet or Vercel logs." });
     } finally {
       setLoading(false);
     }
   };
-
   const onKeyDown = (e) => { if (e.key === "Enter") handleSubmit(); };
 
   const switchMode = () => {
