@@ -338,7 +338,12 @@ function OrdersTab({ setPage }) {
                 </span>
               </div>
               <div className={styles.orderItems}>
-                {order.items.map((e, i) => <span key={i} style={{ fontSize: 26 }}>{e}</span>)}
+                {order.items?.map((e) => (
+  <div key={e._id} style={{ display: "flex", justifyContent: "space-between" }}>
+    <span>{e.name} × {e.quantity}</span>
+    <span>₹{e.price}</span>
+  </div>
+))}
               </div>
               <div className={styles.orderBottom}>
                 <span style={{ color: "var(--muted)", fontSize: 13 }}>
