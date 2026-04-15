@@ -45,8 +45,7 @@ export default function AuthPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "" 
-        },
+        },credentials: "include",
         body: JSON.stringify({
           name: form.name, // Added back for Signup!
           email: form.email.trim(),
