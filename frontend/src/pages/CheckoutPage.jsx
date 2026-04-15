@@ -81,7 +81,7 @@ export default function CheckoutPage() {
     dispatch({ type: "CLEAR" });
 
     addToast("Order placed successfully 🎉", "success");
-    setPage("orders");
+    setTimeout(() => {setPage("home");}, 1000);
 
   } catch (err) {
     console.log(err);
